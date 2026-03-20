@@ -69,7 +69,7 @@
                 <button id="tab-read" onclick="switchStep(0)" class="px-6 py-2 rounded-xl text-xs font-black transition-all active-tab">1. LEER</button>
                 <button id="tab-write" onclick="switchStep(1)" class="px-6 py-2 rounded-xl text-xs font-black transition-all text-slate-500 hover:text-indigo-400">2. ESCRIBIR</button>
             </nav>
-            <div id="display-name" class="text-[10px] font-black text-slate-500 bg-slate-100 px-4 py-2 rounded-full border border-slate-200 uppercase tracking-tighter tracking-widest">NOMBRE</div>
+            <div id="display-name" class="text-[10px] font-black text-slate-500 bg-slate-100 px-4 py-2 rounded-full border border-slate-200 uppercase tracking-widest">NOMBRE</div>
         </header>
 
         <main class="flex-1 overflow-hidden relative">
@@ -129,7 +129,7 @@
                 </div>
             </div>
 
-            <!-- PASO 1: ESCRITURA (Igual que antes) -->
+            <!-- PASO 1: ESCRITURA -->
             <div id="step-1" class="h-full flex flex-col lg:flex-row overflow-hidden bg-slate-50 hidden">
                 <aside class="w-full lg:w-96 bg-white border-r flex flex-col shrink-0">
                     <div class="p-6 border-b flex items-center gap-2">
@@ -189,6 +189,9 @@
     </div>
 
     <script>
+        // API SCRIPT URL - Updated to new version
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxi2ObFhB1PGChAeYcknSAb7Pwy98naNAkH-DikXTOb2-rKHIp7wNu_ru2gtc8o5qU7nQ/exec';
+
         let userName = "";
         let currentStep = 0;
         let originalVisible = false;
@@ -253,7 +256,7 @@
             { cat: "Agradecimiento (Inicio)", list: ["Le agradezco mucho su correo.", "Es un placer saludarle y agradecerle esta oportunidad.", "He recibido su mensaje y le escribo para confirmar mi interés."] },
             { cat: "Respondiendo (Transiciones)", list: ["En cuanto a sus preguntas...", "Con respecto a mi preferencia de...", "En relación con las actividades...", "Para responder a su duda sobre..."] },
             { cat: "Tu Pregunta (Obligatorio)", list: ["Me gustaría saber si...", "¿Podría decirme más sobre...?", "Tengo una pregunta con respecto a...", "¿Sería posible informarme sobre...?"] },
-            { cat: "Despedida (Final)", list: ["Quedo a la espera de sus noticias.", "Le agradezco de antemano su ayuda.", "Sin más por el momento, le saluda atentamente,"] }
+            { cat: "Despedida (Final)", list: ["Quedo a la espera de sus noticias.", "Le agradezco de antemant su ayuda.", "Sin más por el momento, le saluda atentamente,"] }
         ];
 
         function startApp() {
@@ -356,7 +359,8 @@
         function addPhrase(text) {
             const area = document.getElementById('main-textarea');
             const current = area.value;
-            area.value = current + (current.length > 0 && !current.endsWith(' ') ? ' ' : '') + text;
+            const spacing = (current.length > 0 && !current.endsWith(' ') && !current.endsWith('\n')) ? ' ' : '';
+            area.value = current + spacing + text;
             updateWordCount();
             area.focus();
         }
@@ -388,15 +392,40 @@
 
         function handleSubmit() {
             const text = document.getElementById('main-textarea').value.trim();
-            if (!text) return;
+            if (!text) {
+                showModal("Error", "Por favor, escribe tu respuesta antes de entregar.");
+                return;
+            }
+
             const btn = document.getElementById('submit-btn');
-            btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> ENVIANDO...';
+            const originalContent = btn.innerHTML;
+            
+            // UI Feedback
+            btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25" stroke="currentColor"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor"/></svg> ENVIANDO...';
             btn.disabled = true;
-            setTimeout(() => {
-                showModal("¡Enviado con éxito!", "Tu respuesta para el simulador de " + userName + " ha sido grabada.");
+
+            // Prepare Data for Sheet
+            const formData = new FormData();
+            formData.append('name', userName);
+            formData.append('email', text);
+
+            // Google Apps Script Post
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: formData,
+                mode: 'no-cors' 
+            })
+            .then(() => {
+                showModal("¡Enviado con éxito!", "Tu respuesta para el simulador de " + userName + " ha sido grabada correctamente.");
                 btn.innerHTML = 'ENTREGADO';
                 btn.classList.replace('bg-indigo-600', 'bg-green-600');
-            }, 1500);
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                showModal("Error de Envío", "Hubo un problema al conectar con el servidor. Inténtalo de nuevo.");
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            });
         }
 
         function showModal(title, body) {
