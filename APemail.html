@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Examen AP: Respuesta a E-mail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .serif { font-family: 'Merriweather', serif; }
+        .hidden { display: none; }
+        .active-tab { background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); color: #4f46e5; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+        
+        .vocab-word {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            cursor: help;
+            transition: all 0.2s;
+            padding: 0 2px;
+            border-radius: 4px;
+        }
+        .vocab-word:hover {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-pop { animation: fadeInScale 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen overflow-hidden">
+
+    <!-- Pantalla 1: Ingreso de Nombre -->
+    <div id="login-screen" class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div class="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full border border-slate-200 text-center">
+            <div class="w-20 h-20 bg-indigo-600 text-white rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <h1 class="text-3xl font-black mb-2 text-indigo-950">AP Spanish Prep</h1>
+            <p class="text-slate-500 font-medium mb-8 italic">Simulador de Correo Electrónico</p>
+            <input type="text" id="user-name-input" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:bg-white outline-none mb-6 font-bold transition-all text-center text-lg" placeholder="Escribe tu nombre completo">
+            <button onclick="startApp()" class="w-full bg-indigo-600 text-white p-5 rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-lg">Empezar Actividad</button>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div id="app-container" class="h-screen flex flex-col hidden">
+        <header class="bg-white border-b px-8 py-4 flex justify-between items-center shrink-0 z-10 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-black text-indigo-900 text-sm tracking-tight uppercase">Examen AP: Respuesta a E-mail</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Ensayo y Práctica</p>
+                </div>
+            </div>
+            <nav class="flex bg-slate-100 p-1 rounded-2xl">
+                <button id="tab-read" onclick="switchStep(0)" class="px-6 py-2 rounded-xl text-xs font-black transition-all active-tab">1. LEER</button>
+                <button id="tab-write" onclick="switchStep(1)" class="px-6 py-2 rounded-xl text-xs font-black transition-all text-slate-500 hover:text-indigo-400">2. ESCRIBIR</button>
+            </nav>
+            <div id="display-name" class="text-[10px] font-black text-slate-500 bg-slate-100 px-4 py-2 rounded-full border border-slate-200 uppercase tracking-tighter tracking-widest">NOMBRE</div>
+        </header>
+
+        <main class="flex-1 overflow-hidden relative">
+            <!-- PASO 0: LECTURA -->
+            <div id="step-0" class="h-full overflow-y-auto p-6 lg:p-12">
+                <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <!-- Sidebar de Apoyo (Paso 0) -->
+                    <div class="lg:col-span-4 space-y-6">
+                        <div class="bg-indigo-900 text-white p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                            <h2 class="text-xl font-black mb-6 flex items-center gap-3 relative z-10">Estrategias de 5</h2>
+                            <ul class="space-y-4 text-sm font-medium relative z-10">
+                                <li class="flex gap-4">
+                                    <svg class="text-indigo-400 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    Responde a TODAS las preguntas.
+                                </li>
+                                <li class="flex gap-4">
+                                    <svg class="text-indigo-400 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    Usa registro formal (Usted).
+                                </li>
+                                <li class="flex gap-4">
+                                    <svg class="text-indigo-400 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    Incluye una pregunta propia.
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Mini Diccionario Contextual -->
+                        <div id="dictionary-panel" class="bg-white border-2 border-indigo-100 p-6 rounded-3xl shadow-lg hidden animate-pop">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 id="dict-word" class="font-black text-indigo-600 text-lg uppercase tracking-tight">Palabra</h4>
+                                <span class="bg-indigo-100 text-indigo-600 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Vocabulario</span>
+                            </div>
+                            <p id="dict-def" class="text-sm text-slate-600 leading-relaxed mb-4">Selecciona una palabra azul.</p>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-widest">Ejemplo en contexto:</p>
+                                <p id="dict-ex" class="text-xs italic text-slate-500 leading-relaxed">...</p>
+                            </div>
+                        </div>
+
+                        <div id="default-dict-msg" class="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-3xl text-center">
+                            <p class="text-xs font-bold text-slate-400 uppercase leading-relaxed">Haz clic en las palabras <span class="text-indigo-500">azules</span> para ver definiciones y ejemplos.</p>
+                        </div>
+                    </div>
+
+                    <!-- El Email -->
+                    <div class="lg:col-span-8">
+                        <div id="email-content-wrapper">
+                            <!-- JS Inyecta Contenido -->
+                        </div>
+                        <div class="mt-8 flex justify-center pb-12">
+                            <button onclick="switchStep(1)" class="bg-indigo-600 text-white px-12 py-5 rounded-3xl font-black text-xl flex items-center gap-4 hover:bg-indigo-700 shadow-2xl shadow-indigo-200 transition-all hover:-translate-y-1">
+                                Responder ahora 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 1: ESCRITURA (Igual que antes) -->
+            <div id="step-1" class="h-full flex flex-col lg:flex-row overflow-hidden bg-slate-50 hidden">
+                <aside class="w-full lg:w-96 bg-white border-r flex flex-col shrink-0">
+                    <div class="p-6 border-b flex items-center gap-2">
+                        <svg class="text-indigo-600" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <h3 class="text-[10px] font-black uppercase tracking-widest">Frases de Apoyo</h3>
+                    </div>
+                    <div id="phrases-container" class="flex-1 overflow-y-auto p-4 space-y-6"></div>
+                </aside>
+
+                <section class="flex-1 flex flex-col overflow-hidden p-4 lg:p-8">
+                    <div class="flex-1 flex flex-col bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-8 py-4 border-b flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <svg class="text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <span id="borrador-label" class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Borrador</span>
+                            </div>
+                            <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                PALABRAS: <span id="word-count">0</span>
+                            </div>
+                        </div>
+                        <textarea id="main-textarea" class="flex-1 p-8 lg:p-12 text-xl leading-relaxed focus:outline-none resize-none serif text-slate-800" placeholder="Estimada Sra. Rodríguez..."></textarea>
+                        <div class="px-8 py-5 border-t bg-slate-50 flex justify-end">
+                            <button onclick="handleSubmit()" id="submit-btn" class="bg-indigo-600 text-white px-12 py-4 rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all flex items-center gap-3 shadow-xl">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                ENTREGAR TAREA
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="toggle-original" class="mt-6 bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden flex flex-col transition-all h-12">
+                        <button onclick="toggleOriginalView()" class="w-full bg-slate-800 text-white px-6 py-3 flex justify-between items-center shrink-0">
+                            <span class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                Ver Correo Original
+                            </span>
+                            <span id="chevron-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+                        </button>
+                        <div id="original-preview-container" class="flex-1 overflow-y-auto p-6 bg-slate-100 hidden">
+                             <div id="mini-original-email" class="transform scale-90 origin-top opacity-80"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Alerta -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <div id="modal-icon" class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3 id="modal-title" class="text-xl font-black text-slate-900 mb-2">¡Completado!</h3>
+            <p id="modal-body" class="text-slate-500 font-medium mb-6">Procesado correctamente.</p>
+            <button onclick="closeModal()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        let userName = "";
+        let currentStep = 0;
+        let originalVisible = false;
+
+        const dictionary = {
+            "candidato/a": {
+                def: "Persona que aspira a un cargo, premio o posición en una selección.",
+                ex: "A pesar de la competencia, eres un candidato fuerte debido a tus notas."
+            },
+            "inscripción": {
+                def: "Acto de registrarse formalmente en una lista, curso o actividad oficial.",
+                ex: "Por favor, completa el formulario para finalizar tu inscripción en el taller."
+            },
+            "alojamiento": {
+                def: "Lugar físico (casa, hotel, residencia) donde uno reside temporalmente.",
+                ex: "Buscamos un alojamiento que esté cerca de la biblioteca central."
+            },
+            "extracurriculares": {
+                def: "Actividades educativas o deportivas realizadas fuera del programa de estudios normal.",
+                ex: "Las actividades extracurriculares son fundamentales para una educación integral."
+            },
+            "accesibilidad": {
+                def: "Cualidad de ser fácil de usar o alcanzar para todas las personas.",
+                ex: "Estamos trabajando para mejorar la accesibilidad de nuestro sitio web."
+            },
+            "atentamente": {
+                def: "Forma de despedida formal y cortés en la correspondencia escrita.",
+                ex: "Finalice su carta escribiendo: 'Atentamente, [Su nombre]'."
+            },
+            "multicultural": {
+                def: "Que incluye o representa a varias culturas o grupos étnicos diferentes.",
+                ex: "Vivir en un campus multicultural te permite conocer tradiciones de todo el mundo."
+            },
+            "habilidades": {
+                def: "Capacidades o destrezas que tiene una persona para realizar una tarea.",
+                ex: "Este programa te ayudará a desarrollar tus habilidades de liderazgo."
+            },
+            "entorno": {
+                def: "Conjunto de circunstancias o factores sociales y culturales que rodean a alguien.",
+                ex: "Es importante estudiar en un entorno tranquilo y motivador."
+            },
+            "adicional": {
+                def: "Algo que se añade a lo que ya hay para completarlo o mejorarlo.",
+                ex: "Si necesitas información adicional, puedes revisar nuestro catálogo."
+            }
+        };
+
+        const emailData = {
+            de: "Programa de Verano Internacional – Universidad Global",
+            asunto: "Información sobre tus preferencias de programa y alojamiento",
+            cuerpo: [
+                { id: "saludo", text: "Estimado/a estudiante:", tip: "Usa siempre 'Estimado/a' seguido del apellido." },
+                { id: "intro", text: "Nos complace informarte que has sido seleccionado/a como <span class='vocab-word' data-key='candidato/a'>candidato/a</span> para participar en nuestro Programa de Verano Internacional 2024 en la Universidad Global. Este programa ofrece a estudiantes de todo el mundo la oportunidad de participar en cursos intensivos de diversas áreas académicas, talleres culturales, actividades deportivas y excursiones turísticas por la ciudad. Además, tendrás la oportunidad de conocer a estudiantes internacionales y mejorar tus <span class='vocab-word' data-key='habilidades'>habilidades</span> lingüísticas en un <span class='vocab-word' data-key='entorno'>entorno</span> <span class='vocab-word' data-key='multicultural'>multicultural</span>.", tip: "Agradece el correo recibido y confirma tu interés." },
+                { id: "action", text: "Para continuar con el proceso de <span class='vocab-word' data-key='inscripción'>inscripción</span>, necesitamos que nos respondas a la mayor brevedad posible con la siguiente información:", isBold: true },
+                { id: "preguntas", text: "¿Qué áreas académicas te interesaría explorar durante el programa?<br>¿Prefieres alojarte en una residencia universitaria, con una familia anfitriona o en un <span class='vocab-word' data-key='alojamiento'>alojamiento</span> compartido? Por favor, explica tu elección.<br>¿Tienes alguna necesidad alimenticia, médica o de <span class='vocab-word' data-key='accesibilidad'>accesibilidad</span> que debamos considerar?<br>¿Qué expectativas tienes sobre tu experiencia en el programa y qué actividades <span class='vocab-word' data-key='extracurriculares'>extracurriculares</span> te interesan más?", isList: true, tip: "Responde a las 4 preguntas usando 'Usted'." },
+                { id: "contacto", text: "Por favor, responde a todas las preguntas y no dudes en contactarnos si tienes alguna pregunta <span class='vocab-word' data-key='adicional'>adicional</span> sobre el programa, las clases o la vida en la universidad.", isItalic: true },
+                { id: "despedida", text: "<span class='vocab-word' data-key='atentamente'>Atentamente</span>,<br><strong>María Rodríguez</strong><br><small class='text-slate-500'>Coordinadora de Admisiones</small>", tip: "Despídete con cortesía." }
+            ]
+        };
+
+        const phrases = [
+            { cat: "Agradecimiento (Inicio)", list: ["Le agradezco mucho su correo.", "Es un placer saludarle y agradecerle esta oportunidad.", "He recibido su mensaje y le escribo para confirmar mi interés."] },
+            { cat: "Respondiendo (Transiciones)", list: ["En cuanto a sus preguntas...", "Con respecto a mi preferencia de...", "En relación con las actividades...", "Para responder a su duda sobre..."] },
+            { cat: "Tu Pregunta (Obligatorio)", list: ["Me gustaría saber si...", "¿Podría decirme más sobre...?", "Tengo una pregunta con respecto a...", "¿Sería posible informarme sobre...?"] },
+            { cat: "Despedida (Final)", list: ["Quedo a la espera de sus noticias.", "Le agradezco de antemano su ayuda.", "Sin más por el momento, le saluda atentamente,"] }
+        ];
+
+        function startApp() {
+            const input = document.getElementById('user-name-input');
+            if (!input.value.trim()) return;
+            userName = input.value;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('display-name').innerText = userName;
+            renderEmail();
+            renderPhrases();
+        }
+
+        function switchStep(step) {
+            currentStep = step;
+            document.getElementById('step-0').classList.toggle('hidden', step !== 0);
+            document.getElementById('step-1').classList.toggle('hidden', step !== 1);
+            document.getElementById('tab-read').classList.toggle('active-tab', step === 0);
+            document.getElementById('tab-write').classList.toggle('active-tab', step === 1);
+            if (step === 1) document.getElementById('main-textarea').focus();
+        }
+
+        function renderEmail() {
+            const container = document.getElementById('email-content-wrapper');
+            const miniContainer = document.getElementById('mini-original-email');
+            
+            const emailHtml = `
+                <div class="bg-white p-8 md:p-12 rounded-2xl border border-slate-200 shadow-xl text-left relative overflow-hidden">
+                    <div class="space-y-2 mb-8 pb-6 border-b border-slate-100 text-sm">
+                        <p class="flex items-center gap-2"><span class="font-bold text-slate-400 w-16">De:</span> <span class="text-indigo-600 font-bold">${emailData.de}</span></p>
+                        <p class="flex items-center gap-2"><span class="font-bold text-slate-400 w-16">Asunto:</span> <span class="font-semibold text-slate-700">${emailData.asunto}</span></p>
+                    </div>
+                    <div class="text-slate-700 leading-relaxed serif text-lg space-y-6">
+                        ${emailData.cuerpo.map(part => {
+                            const boldClass = part.isBold ? 'font-bold text-slate-900 border-l-4 border-indigo-200 pl-4' : '';
+                            const italicClass = part.isItalic ? 'italic text-slate-600' : '';
+                            const listClass = part.isList ? 'list-disc ml-4 font-medium text-indigo-900 bg-slate-50 p-6 rounded-2xl border border-transparent' : '';
+                            
+                            return `
+                                <div class="group relative cursor-pointer rounded p-1 hover:bg-indigo-50/50 transition-all">
+                                    <div class="${boldClass} ${italicClass} ${listClass}" onclick="showTip('${part.id}')">
+                                        ${part.text}
+                                    </div>
+                                    ${part.tip ? `<div id="tip-${part.id}" class="hidden mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-800 animate-pop">💡 CONSEJO: ${part.tip}</div>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = emailHtml;
+            miniContainer.innerHTML = emailHtml;
+
+            document.querySelectorAll('.vocab-word').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const key = el.getAttribute('data-key');
+                    showDictionary(key);
+                });
+            });
+        }
+
+        function showDictionary(key) {
+            const panel = document.getElementById('dictionary-panel');
+            const defaultMsg = document.getElementById('default-dict-msg');
+            const data = dictionary[key];
+            if (!data) return;
+
+            document.getElementById('dict-word').innerText = key;
+            document.getElementById('dict-def').innerText = data.def;
+            document.getElementById('dict-ex').innerText = data.ex;
+            
+            defaultMsg.classList.add('hidden');
+            panel.classList.remove('hidden');
+            panel.classList.remove('animate-pop');
+            void panel.offsetWidth; // Trigger reflow
+            panel.classList.add('animate-pop');
+        }
+
+        function showTip(id) {
+            const tipEl = document.getElementById("tip-" + id);
+            if (!tipEl) return;
+            const allTips = document.querySelectorAll('[id^="tip-"]');
+            allTips.forEach(t => { if (t !== tipEl) t.classList.add('hidden'); });
+            tipEl.classList.toggle('hidden');
+        }
+
+        function renderPhrases() {
+            const container = document.getElementById('phrases-container');
+            container.innerHTML = phrases.map(group => {
+                const buttons = group.list.map(phrase => `
+                    <button onclick="addPhrase('${phrase.replace(/'/g, "\\'")}')" class="w-full text-left p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 hover:border-indigo-400 hover:bg-indigo-50 transition-all active:scale-95 shadow-sm">
+                        ${phrase}
+                    </button>
+                `).join('');
+                return `<div><h4 class="text-[10px] font-black text-slate-400 uppercase mb-3 px-2">${group.cat}</h4><div class="space-y-2">${buttons}</div></div>`;
+            }).join('');
+        }
+
+        function addPhrase(text) {
+            const area = document.getElementById('main-textarea');
+            const current = area.value;
+            area.value = current + (current.length > 0 && !current.endsWith(' ') ? ' ' : '') + text;
+            updateWordCount();
+            area.focus();
+        }
+
+        function updateWordCount() {
+            const area = document.getElementById('main-textarea');
+            const text = area.value.trim();
+            const count = text === "" ? 0 : text.split(/\s+/).length;
+            document.getElementById('word-count').innerText = count;
+        }
+
+        document.getElementById('main-textarea').addEventListener('input', updateWordCount);
+
+        function toggleOriginalView() {
+            originalVisible = !originalVisible;
+            const toggle = document.getElementById('toggle-original');
+            const preview = document.getElementById('original-preview-container');
+            const chevron = document.getElementById('chevron-icon');
+            if (originalVisible) {
+                toggle.classList.remove('h-12'); toggle.classList.add('h-[400px]');
+                preview.classList.remove('hidden');
+                chevron.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>';
+            } else {
+                toggle.classList.add('h-12'); toggle.classList.remove('h-[400px]');
+                preview.classList.add('hidden');
+                chevron.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+            }
+        }
+
+        function handleSubmit() {
+            const text = document.getElementById('main-textarea').value.trim();
+            if (!text) return;
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = '<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> ENVIANDO...';
+            btn.disabled = true;
+            setTimeout(() => {
+                showModal("¡Enviado con éxito!", "Tu respuesta para el simulador de " + userName + " ha sido grabada.");
+                btn.innerHTML = 'ENTREGADO';
+                btn.classList.replace('bg-indigo-600', 'bg-green-600');
+            }, 1500);
+        }
+
+        function showModal(title, body) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerText = body;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
